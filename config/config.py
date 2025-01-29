@@ -6,10 +6,10 @@ load_dotenv()
 class Config:
     PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
     
-    # Stock symbols to analyze
+    # Stock symbols to analyze (default values)
     SYMBOLS = ["AAPL", "MSFT"]
     
-    # Time period for analysis
+    # Time period for analysis (default value)
     PERIOD = "1mo"
     
     # Technical analysis parameters
