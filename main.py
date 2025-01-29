@@ -8,6 +8,9 @@ from data.stock_data import StockDataFetcher
 from agents.fundamental_agent import FundamentalAnalysisAgent
 from agents.technical_agent import TechnicalAnalysisAgent
 
+outputs = {}
+outputs_list = []
+
 # Define state type
 class AgentState(TypedDict):
     symbol: str
@@ -16,7 +19,9 @@ class AgentState(TypedDict):
     fundamental_analysis: str | None
     technical_analysis: Dict | None
 
+
 async def main():
+    
     # Initialize agents
     fundamental_agent = FundamentalAnalysisAgent(Config.PERPLEXITY_API_KEY)
     technical_agent = TechnicalAnalysisAgent(Config.TECHNICAL_PARAMS)
@@ -29,19 +34,19 @@ async def main():
         data_fetcher = StockDataFetcher()
         stock_data = data_fetcher.get_stock_data(state["symbol"], Config.PERIOD)
         company_info = data_fetcher.get_company_info(state["symbol"])
-        
-        return {
-            **state,
-            "stock_data": stock_data,
-            "company_info": company_info
-        }
+        global outputs
+        state["stock_data"] = stock_data
+        state["company_info"] = company_info
+        outputs["symbol"] = state["symbol"]
+        outputs["stock_data"] = stock_data
+        outputs["company_info"] = company_info
+        return state
     
     async def analyze_fundamentals(state: Dict) -> Dict:
         sentiment = await fundamental_agent.analyze_sentiment(state["company_info"])
-        return {
-            **state,
-            "fundamental_analysis": sentiment
-        }
+        state["fundamental_analysis"] = sentiment
+        outputs["fundamental_analysis"] = sentiment
+        return state
     
     async def analyze_technicals(state: Dict) -> Dict:
         technical_analysis = technical_agent.analyze_technicals(state["stock_data"])
@@ -87,12 +92,9 @@ async def main():
             return report
         
         analysis_report = generate_report(technical_analysis)
-        print("analysis report")
-        print(analysis_report)
-        return {
-            **state,
-            "technical_analysis": analysis_report
-        }
+        outputs["technical_analysis"] = analysis_report
+        state["technical_analysis"] = analysis_report
+        return state
     
     # Add nodes to graph
     workflow.add_node("fetch_data", fetch_data)
@@ -120,10 +122,12 @@ async def main():
             "technical_analysis": None
         }
         result = await app.ainvoke(initial_state)
+        print(outputs)
+        outputs_list.append(outputs)
 
         results[symbol] = result
+    return outputs_list
     
-    return results
 
 if __name__ == "__main__":
     results = asyncio.run(main())
