@@ -45,11 +45,53 @@ async def main():
     
     async def analyze_technicals(state: Dict) -> Dict:
         technical_analysis = technical_agent.analyze_technicals(state["stock_data"])
-        print("technical analysis")
-        print(technical_analysis)
+
+        def generate_report(technical_analysis):
+            """Generates a detailed technical analysis report."""
+
+            entry = technical_analysis["entry_point"]
+            target = technical_analysis["target_price"]
+            stop_loss = technical_analysis["stop_loss"]
+            position = technical_analysis["position"]
+            risk_reward_ratio = technical_analysis["risk_reward_ratio"]
+            
+            # Determine market structure based on trend direction
+            market_structure = "Bullish" if position == "long" else "Bearish"
+            liquidity_zones = "Key liquidity grab areas around support and resistance zones."
+            supply_demand_zones = (
+                "Price is reacting near a high-demand zone (support) suggesting a long trade."
+                if position == "long"
+                else "Price is reacting near a supply zone (resistance) indicating a short trade."
+            )
+            
+            report = f"""
+            **Technical Analysis Report**
+            ------------------------------------
+            **Market Structure:** {market_structure}
+            **Liquidity Zones:** {liquidity_zones}
+            **Supply & Demand Zones:** {supply_demand_zones}
+            
+            **Trade Recommendation:**
+            - **Entry Point:** {entry:.2f}
+            - **Target Price:** {target:.2f}
+            - **Stop Loss:** {stop_loss:.2f}
+            - **Risk-to-Reward Ratio:** {risk_reward_ratio:.2f}
+            - **Trade Direction:** {'📈 Long (Buy)' if position == 'long' else '📉 Short (Sell)'}
+            
+            **Trade Justification:**
+            - The market structure indicates a **{market_structure} trend**.
+            - **Liquidity zones** suggest institutional interest around these price levels.
+            - **Supply & Demand zones** confirm potential price reaction areas.
+            - Risk management is applied with a clear **Stop Loss and Risk-to-Reward Ratio**.
+            """
+            return report
+        
+        analysis_report = generate_report(technical_analysis)
+        print("analysis report")
+        print(analysis_report)
         return {
             **state,
-            "technical_analysis": technical_analysis
+            "technical_analysis": analysis_report
         }
     
     # Add nodes to graph

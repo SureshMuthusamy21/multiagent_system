@@ -5,16 +5,17 @@ from typing import Dict
 class TechnicalAnalysisAgent:
     def __init__(self, params: Dict):
         self.params = params
+        self.analysis = None
     
     def analyze_technicals(self, stock_data: pd.DataFrame):
         """Perform technical analysis using Smart Money Concepts"""
-        analysis = {
+        self.analysis = {
             "smc_levels": self._calculate_smc_levels(stock_data),
             "rsi": self._calculate_rsi(stock_data),
             "trend": self._analyze_trend(stock_data)
         }
         
-        return self._generate_trade_recommendation(analysis, stock_data)
+        return self._generate_trade_recommendation(self.analysis, stock_data)
     
     def _calculate_smc_levels(self, data: pd.DataFrame):
         """Calculate Smart Money Concepts levels"""
